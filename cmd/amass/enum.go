@@ -63,6 +63,7 @@ type enumArgs struct {
 	Timeout           int
 	Options           struct {
 		Active          bool
+		AllowTorDNS	bool
 		Alterations     bool
 		BruteForcing    bool
 		DemoMode        bool
@@ -132,6 +133,7 @@ func defineEnumOptionFlags(enumFlags *flag.FlagSet, args *enumArgs) {
 	enumFlags.BoolVar(&args.Options.IPv6, "ipv6", false, "Show the IPv6 addresses for discovered names")
 	enumFlags.BoolVar(&args.Options.ListSources, "list", false, "Print the names of all available data sources")
 	enumFlags.BoolVar(&args.Options.Alterations, "alts", false, "Enable generation of altered names")
+	enumFlags.BoolVar(&args.Options.AllowTorDNS, "tordns", false, "Allow DNS lookup via Tor (only do DNS lookups for A-records)")
 	enumFlags.BoolVar(&args.Options.NoAlts, "noalts", true, "Deprecated flag to be removed in version 4.0")
 	enumFlags.BoolVar(&args.Options.NoColor, "nocolor", false, "Disable colorized output")
 	enumFlags.BoolVar(&placeholder, "nolocaldb", false, "Deprecated feature to be removed in version 4.0")
@@ -727,6 +729,9 @@ func (e enumArgs) OverrideConfig(conf *config.Config) error {
 	}
 	if e.Options.BruteForcing {
 		conf.BruteForcing = true
+	}
+	if e.Options.AllowTorDNS {
+		conf.AllowTorDNS = true
 	}
 	if e.Options.Alterations {
 		conf.Alterations = true

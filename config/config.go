@@ -107,6 +107,9 @@ type Config struct {
 
 	// Determines if zone transfers will be attempted
 	Active bool
+	
+	//Allow running amass over Tor (does DNS lookup for A records rather than PTR records)
+	AllowTorDNS bool
 
 	// A blacklist of subdomain names that will not be investigated
 	Blacklist     []string
@@ -238,6 +241,13 @@ func (c *Config) LoadSettings(path string) error {
 			c.Passive = true
 		} else if mode == "active" {
 			c.Active = true
+		}
+	}
+	
+	if cfg.Section(ini.DefaultSection).HasKey("torfriendly") {
+		mode, err := cfg.Section(ini.DefaultSection).Key("mode").Bool()
+		if err == nil {
+			c.AllowTorDNS = mode
 		}
 	}
 
