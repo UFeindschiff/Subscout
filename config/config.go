@@ -245,7 +245,7 @@ func (c *Config) LoadSettings(path string) error {
 	}
 	
 	if cfg.Section(ini.DefaultSection).HasKey("torfriendly") {
-		mode, err := cfg.Section(ini.DefaultSection).Key("mode").Bool()
+		mode, err := cfg.Section(ini.DefaultSection).Key("torfriendly").Bool()
 		if err == nil {
 			c.AllowTorDNS = mode
 		}
