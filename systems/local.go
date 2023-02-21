@@ -349,7 +349,11 @@ func untrustedResolvers(cfg *config.Config, max int) (*resolve.Resolvers, int) {
 		CountNotImplemented: true,
 		CountQueryRefusals:  true,
 	})
-	pool.ClientSubnetCheck()
+	//This check attempts for resolvers to query the TXT record, which is not implemented over Tor, resulting in all resolvers to fail and an empty pool
+	if !cfg.AllowTorDNS {
+		pool.ClientSubnetCheck()
+	}
+	
 	return pool, pool.Len()
 }
 

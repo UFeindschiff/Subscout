@@ -172,6 +172,9 @@ func (dt *dnsTask) Process(ctx context.Context, data pipeline.Data, tp pipeline.
 	switch v := data.(type) {
 	case *requests.DNSRequest:
 		qtype := FwdQueryTypes[0]
+		if dt.enum.Config.AllowTorDNS {
+			qtype = FwdQueryTypes[1]
+		}
 		msg := resolve.QueryMsg(v.Name, qtype)
 		k := key(msg.Id, msg.Question[0].Name)
 
@@ -188,6 +191,10 @@ func (dt *dnsTask) Process(ctx context.Context, data pipeline.Data, tp pipeline.
 			dt.enum.Config.Log.Printf("Failed to enter %s into the request registry on the %s DNS task", msg.Question[0].Name, dt.trust)
 		}
 	case *requests.AddrRequest:
+		if dt.enum.Config.AllowTorDNS {
+			//Tor DNS does not implement PTR requests
+			return nil, nil
+		}
 		if reserved, _ := amassnet.IsReservedAddress(v.Address); !reserved {
 			msg := resolve.ReverseMsg(v.Address)
 			k := key(msg.Id, msg.Question[0].Name)
@@ -494,7 +501,7 @@ func (dt *dnsTask) queryNS(ctx context.Context, name, domain string, ch chan []r
 	tp.Pipeline().IncDataItemCount()
 	defer tp.Pipeline().DecDataItemCount()
 	// Obtain the DNS answers for the NS records related to the domain
-	if resp, err := dt.enum.dnsQuery(ctx, name, dns.TypeNS, dt.enum.Sys.TrustedResolvers(), maxDNSQueryAttempts); err == nil {
+	if resp, err := dt.enum.dnsQuery(ctx, name, dns.TypeNS, dt.enum.Sys.TrustedResolvers(), maxDNSQueryAttempts); err == nil && !dt.enum.Config.AllowTorDNS {
 		if ans := resolve.ExtractAnswers(resp); len(ans) > 0 {
 			if rr := resolve.AnswersByType(ans, dns.TypeNS); len(rr) > 0 {
 				var records []requests.DNSAnswer
@@ -522,7 +529,7 @@ func (dt *dnsTask) queryMX(ctx context.Context, name string, ch chan []requests.
 	tp.Pipeline().IncDataItemCount()
 	defer tp.Pipeline().DecDataItemCount()
 	// Obtain the DNS answers for the MX records related to the domain
-	if resp, err := dt.enum.dnsQuery(ctx, name, dns.TypeMX, dt.enum.Sys.TrustedResolvers(), maxDNSQueryAttempts); err == nil {
+	if resp, err := dt.enum.dnsQuery(ctx, name, dns.TypeMX, dt.enum.Sys.TrustedResolvers(), maxDNSQueryAttempts); err == nil && !dt.enum.Config.AllowTorDNS {
 		if ans := resolve.ExtractAnswers(resp); len(ans) > 0 {
 			if rr := resolve.AnswersByType(ans, dns.TypeMX); len(rr) > 0 {
 				ch <- convertAnswers(rr)
@@ -537,7 +544,7 @@ func (dt *dnsTask) querySOA(ctx context.Context, name string, ch chan []requests
 	tp.Pipeline().IncDataItemCount()
 	defer tp.Pipeline().DecDataItemCount()
 	// Obtain the DNS answers for the SOA records related to the domain
-	if resp, err := dt.enum.dnsQuery(ctx, name, dns.TypeSOA, dt.enum.Sys.TrustedResolvers(), maxDNSQueryAttempts); err == nil {
+	if resp, err := dt.enum.dnsQuery(ctx, name, dns.TypeSOA, dt.enum.Sys.TrustedResolvers(), maxDNSQueryAttempts); err == nil && !dt.enum.Config.AllowTorDNS {
 		if ans := resolve.ExtractAnswers(resp); len(ans) > 0 {
 			if rr := resolve.AnswersByType(ans, dns.TypeSOA); len(rr) > 0 {
 				var records []requests.DNSAnswer
@@ -558,7 +565,7 @@ func (dt *dnsTask) querySPF(ctx context.Context, name string, ch chan []requests
 	tp.Pipeline().IncDataItemCount()
 	defer tp.Pipeline().DecDataItemCount()
 	// Obtain the DNS answers for the SPF records related to the domain
-	if resp, err := dt.enum.dnsQuery(ctx, name, dns.TypeSPF, dt.enum.Sys.TrustedResolvers(), maxDNSQueryAttempts); err == nil {
+	if resp, err := dt.enum.dnsQuery(ctx, name, dns.TypeSPF, dt.enum.Sys.TrustedResolvers(), maxDNSQueryAttempts); err == nil && !dt.enum.Config.AllowTorDNS {
 		if ans := resolve.ExtractAnswers(resp); len(ans) > 0 {
 			if rr := resolve.AnswersByType(ans, dns.TypeSPF); len(rr) > 0 {
 				ch <- convertAnswers(rr)
@@ -570,6 +577,9 @@ func (dt *dnsTask) querySPF(ctx context.Context, name string, ch chan []requests
 }
 
 func (dt *dnsTask) queryServiceNames(ctx context.Context, req *requests.DNSRequest, tp pipeline.TaskParams) {
+	if dt.enum.Config.AllowTorDNS {
+		return //SRV is not implemented over Tor
+	}
 	var wg sync.WaitGroup
 
 	wg.Add(len(popularSRVRecords))
