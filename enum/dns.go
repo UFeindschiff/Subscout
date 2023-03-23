@@ -577,16 +577,7 @@ func (dt *dnsTask) querySPF(ctx context.Context, name string, ch chan []requests
 }
 
 func (dt *dnsTask) queryServiceNames(ctx context.Context, req *requests.DNSRequest, tp pipeline.TaskParams) {
-	if dt.enum.Config.AllowTorDNS {
-		return //SRV is not implemented over Tor
-	}
-	var wg sync.WaitGroup
-
-	wg.Add(len(popularSRVRecords))
-	for _, name := range popularSRVRecords {
-		go dt.querySingleServiceName(ctx, name+"."+req.Name, req.Domain, &wg, tp)
-	}
-	wg.Wait()
+	return
 }
 
 func (dt *dnsTask) querySingleServiceName(ctx context.Context, name, domain string, wg *sync.WaitGroup, tp pipeline.TaskParams) {
