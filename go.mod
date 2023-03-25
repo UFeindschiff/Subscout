@@ -28,6 +28,8 @@ require (
 	layeh.com/gopher-json v0.0.0-20201124131017-552bb3c4c3bf
 )
 
+replace github.com/caffix/resolve v0.6.18 => github.com/UFeindschiff/caffixresolve-patched v0.0.0-20230323144125-dbc7c679ed71
+
 require (
 	github.com/AndreasBriese/bbloom v0.0.0-20190825152654-46b345b51c96 // indirect
 	github.com/VividCortex/gohistogram v1.0.0 // indirect

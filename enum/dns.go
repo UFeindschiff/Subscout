@@ -23,10 +23,10 @@ import (
 )
 
 const (
-	maxDNSQueryAttempts int           = 50
-	maxRcodeServerFails int           = 3
+	maxDNSQueryAttempts int           = 5
+	maxRcodeServerFails int           = 2
 	initialBackoffDelay time.Duration = 250 * time.Millisecond
-	maximumBackoffDelay time.Duration = 4 * time.Second
+	maximumBackoffDelay time.Duration = 1 * time.Second
 )
 
 // FwdQueryTypes include the DNS record types that are queried for a discovered name.
@@ -185,7 +185,7 @@ func (dt *dnsTask) Process(ctx context.Context, data pipeline.Data, tp pipeline.
 			Attempts:   1,
 			HasRecords: len(v.Records) > 0,
 		}) {
-			dt.pool.Query(ctx, msg, dt.resps)
+			go dt.pool.Query(ctx, msg, dt.resps)
 			return nil, nil
 		} else {
 			dt.enum.Config.Log.Printf("Failed to enter %s into the request registry on the %s DNS task", msg.Question[0].Name, dt.trust)
@@ -206,7 +206,7 @@ func (dt *dnsTask) Process(ctx context.Context, data pipeline.Data, tp pipeline.
 				Attempts: 1,
 				InScope:  v.InScope,
 			}) {
-				dt.pool.Query(ctx, msg, dt.resps)
+				go dt.pool.Query(ctx, msg, dt.resps)
 				return nil, nil
 			} else {
 				dt.enum.Config.Log.Printf("Failed to enter %s into the request registry on the %s DNS task", msg.Question[0].Name, dt.trust)
@@ -367,7 +367,7 @@ func (dt *dnsTask) retry(msg *dns.Msg, id uint16, entry *req) {
 		dt.delReq(k)
 		dt.addReq(key(msg.Id, msg.Question[0].Name), entry)
 		time.Sleep(resolve.TruncatedExponentialBackoff(entry.Attempts-1, initialBackoffDelay, maximumBackoffDelay))
-		dt.pool.Query(entry.Ctx, msg, dt.resps)
+		go dt.pool.Query(entry.Ctx, msg, dt.resps)
 	} else {
 		dt.enum.Config.Log.Printf("%s was dropped after failing to resolve %d times on the %s DNS task", msg.Question[0].Name, entry.Attempts-1, dt.trust)
 		dt.delReqWithDecrement(k)
@@ -384,7 +384,7 @@ func (dt *dnsTask) nextType(ctx context.Context, name string, id, qtype uint16, 
 		msg := resolve.QueryMsg(name, entry.Qtype)
 		dt.delReq(k)
 		dt.addReq(key(msg.Id, msg.Question[0].Name), entry)
-		dt.pool.Query(ctx, msg, dt.resps)
+		go dt.pool.Query(ctx, msg, dt.resps)
 	} else {
 		dt.delReqWithDecrement(k)
 	}
