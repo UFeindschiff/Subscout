@@ -108,7 +108,7 @@ type Config struct {
 	// Determines if zone transfers will be attempted
 	Active bool
 	
-	//Allow running amass over Tor (does DNS lookup for A records rather than PTR records)
+	//Allow running amass over Tor (does DNS lookup for A records rather than CNAME records)
 	AllowTorDNS bool
 
 	// A blacklist of subdomain names that will not be investigated
@@ -250,9 +250,22 @@ func (c *Config) LoadSettings(path string) error {
 			c.AllowTorDNS = mode
 		}
 	}
+	
+	if cfg.Section(ini.DefaultSection).HasKey("queries_per_server") {
+		qps, err := cfg.Section(ini.DefaultSection).Key("queries_per_server").Int()
+		if err == nil {
+			DefaultQueriesPerPublicResolver = qps
+			DefaultQueriesPerBaselineResolver = qps
+			c.ResolversQPS = qps
+			c.TrustedQPS = qps
+		} else {
+			return fmt.Errorf("failed to parse the configuration file at queries_per_server key: %v", err)
+		}
+	}
 
 	loads := []func(cfg *ini.File) error{
 		c.loadResolverSettings,
+		c.loadTrustedResolverSettings,
 		c.loadScopeSettings,
 		c.loadAlterationSettings,
 		c.loadBruteForceSettings,

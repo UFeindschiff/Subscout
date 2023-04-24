@@ -307,9 +307,6 @@ func trustedResolvers(cfg *config.Config, max int) (*resolve.Resolvers, int) {
 
 	if len(cfg.TrustedResolvers) > 0 {
 		_ = pool.AddResolvers(cfg.TrustedQPS, cfg.TrustedResolvers...)
-	} else {
-		_ = pool.AddResolvers(cfg.TrustedQPS, config.DefaultBaselineResolvers...)
-		pool.SetDetectionResolver(cfg.TrustedQPS, "8.8.8.8")
 	}
 
 	pool.SetLogger(cfg.Log)
@@ -321,12 +318,8 @@ func untrustedResolvers(cfg *config.Config, max int) (*resolve.Resolvers, int) {
 	if max <= 0 {
 		return nil, 0
 	}
-	if len(cfg.Resolvers) == 0 {
+	if len(cfg.Resolvers) == 0 && !cfg.AllowTorDNS {
 		cfg.Resolvers = publicResolverAddrs(cfg)
-		if len(cfg.Resolvers) == 0 {
-			// Failed to use the public DNS resolvers database
-			cfg.Resolvers = config.DefaultBaselineResolvers
-		}
 	}
 	cfg.Resolvers = checkAddresses(cfg.Resolvers)
 

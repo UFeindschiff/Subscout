@@ -19,33 +19,13 @@ import (
 )
 
 // DefaultQueriesPerPublicResolver is the number of queries sent to each public DNS resolver per second.
-const DefaultQueriesPerPublicResolver = 25
+var DefaultQueriesPerPublicResolver = 150
 
 // DefaultQueriesPerBaselineResolver is the number of queries sent to each trusted DNS resolver per second.
-const DefaultQueriesPerBaselineResolver = 25
+var DefaultQueriesPerBaselineResolver = 150
 
 const minResolverReliability = 0.85
 
-// DefaultBaselineResolvers is a list of trusted public DNS resolvers.
-var DefaultBaselineResolvers = []string{
-	"8.8.8.8",        // Google
-	"1.1.1.1",        // Cloudflare
-	"9.9.9.9",        // Quad9
-	"208.67.222.222", // Cisco OpenDNS
-	"84.200.69.80",   // DNS.WATCH
-	"64.6.64.6",      // Neustar DNS
-	"8.26.56.26",     // Comodo Secure DNS
-	"205.171.3.65",   // Level3
-	"134.195.4.2",    // OpenNIC
-	"185.228.168.9",  // CleanBrowsing
-	"76.76.19.19",    // Alternate DNS
-	"37.235.1.177",   // FreeDNS
-	"77.88.8.1",      // Yandex.DNS
-	"94.140.14.140",  // AdGuard
-	"38.132.106.139", // CyberGhost
-	"74.82.42.42",    // Hurricane Electric
-	"76.76.2.0",      // ControlD
-}
 
 // PublicResolvers includes the addresses of public resolvers obtained dynamically.
 var PublicResolvers []string
@@ -83,13 +63,8 @@ func GetPublicDNSResolvers() error {
 			resolvers = append(resolvers, record[ipIdx])
 		}
 	}
-loop:
+	
 	for _, addr := range resolvers {
-		for _, br := range DefaultBaselineResolvers {
-			if addr == br {
-				continue loop
-			}
-		}
 		PublicResolvers = append(PublicResolvers, addr)
 	}
 	return nil
@@ -165,6 +140,20 @@ func (c *Config) loadResolverSettings(cfg *ini.File) error {
 	c.Resolvers = stringset.Deduplicate(sec.Key("resolver").ValueWithShadows())
 	if len(c.Resolvers) == 0 {
 		return errors.New("no resolver keys were found in the resolvers section")
+	}
+
+	return nil
+}
+
+func (c *Config) loadTrustedResolverSettings(cfg *ini.File) error {
+	sec, err := cfg.GetSection("trusted_resolvers")
+	if err != nil {
+		return nil
+	}
+
+	c.TrustedResolvers = stringset.Deduplicate(sec.Key("resolver").ValueWithShadows())
+	if len(c.TrustedResolvers) == 0 {
+		return errors.New("no resolver keys were found in the trusted_resolvers section")
 	}
 
 	return nil
