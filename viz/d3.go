@@ -14,7 +14,7 @@ const d3Template = `
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>OWASP Amass Network Mapping</title>
+    <title>Domain Network Mapping</title>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <style>
         div#tooltip {
@@ -290,7 +290,7 @@ func WriteD3Data(output io.Writer, nodes []Node, edges []Edge) error {
 		"as":        "blue",
 	}
 
-	graph := &d3Graph{Name: "OWASP Amass - Attack Surface Mapping"}
+	graph := &d3Graph{Name: "Attack Surface Mapping"}
 
 	for idx, node := range nodes {
 		label := node.Title
