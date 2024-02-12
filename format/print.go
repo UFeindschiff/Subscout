@@ -17,25 +17,17 @@ import (
 )
 
 // Banner is the ASCII art logo used within help output.
-const Banner = `        .+++:.            :                             .+++.
-      +W@@@@@@8        &+W@#               o8W8:      +W@@@@@@#.   oW@@@W#+
-     &@#+   .o@##.    .@@@o@W.o@@o       :@@#&W8o    .@#:  .:oW+  .@#+++&#&
-    +@&        &@&     #@8 +@W@&8@+     :@W.   +@8   +@:          .@8
-    8@          @@     8@o  8@8  WW    .@W      W@+  .@W.          o@#:
-    WW          &@o    &@:  o@+  o@+   #@.      8@o   +W@#+.        +W@8:
-    #@          :@W    &@+  &@+   @8  :@o       o@o     oW@@W+        oW@8
-    o@+          @@&   &@+  &@+   #@  &@.      .W@W       .+#@&         o@W.
-     WW         +@W@8. &@+  :&    o@+ #@      :@W&@&         &@:  ..     :@o
-     :@W:      o@# +Wo &@+        :W: +@W&o++o@W. &@&  8@#o+&@W.  #@:    o@+
-      :W@@WWWW@@8       +              :&W@@@@&    &W  .o#@@W&.   :W@WWW@@&
-        +o&&&&+.                                                    +oooo.`
+const Banner = `      _/_/_/  _/    _/  _/_/_/      _/_/_/    _/_/_/    _/_/    _/    _/  _/_/_/_/_/   
+   _/        _/    _/  _/    _/  _/        _/        _/    _/  _/    _/      _/        
+    _/_/    _/    _/  _/_/_/      _/_/    _/        _/    _/  _/    _/      _/         
+       _/  _/    _/  _/    _/        _/  _/        _/    _/  _/    _/      _/          
+_/_/_/      _/_/    _/_/_/    _/_/_/      _/_/_/    _/_/      _/_/        _/     `
 
 const (
-	// Version is used to display the current version of Amass.
-	Version = "v3.21.2"
+	// This is bad design inherited from Amass...
+	Version = "v0.9"
 
-	// Author is used to display the Amass Project Team.
-	Author = "OWASP Amass Project - @owaspamass"
+	Author = "Jacob Grimm"
 
 	// Description is the slogan for the Amass Project.
 	Description = "In-depth Attack Surface Mapping and Asset Discovery"
@@ -95,8 +87,8 @@ func FprintEnumerationSummary(out io.Writer, total int, tags map[string]int, asn
 
 	fmt.Fprintln(out)
 	// Print the header information
-	title := "OWASP Amass "
-	site := "https://github.com/OWASP/Amass"
+	title := "Subscout "
+	site := "https://github.com/UFeindschiff/Subscout"
 	b.Fprint(out, title+Version)
 	num := 80 - (len(title) + len(Version) + len(site))
 	pad(num, " ")
@@ -161,7 +153,7 @@ func FprintBanner(out io.Writer) {
 		}
 	}
 
-	_, _ = r.Fprintf(out, "\n%s\n\n", Banner)
+	_, _ = b.Fprintf(out, "\n%s\n\n", Banner)
 	pad(rightmost - len(Version))
 	_, _ = y.Fprintln(out, Version)
 	pad(rightmost - len(Author))
