@@ -100,6 +100,8 @@ type Config struct {
 	MinForWordFlip int
 	EditDistance   int
 	AltWordlist    []string
+	
+	DoServiceLookup bool
 
 	// Only access the data sources for names and return results?
 	Passive bool
@@ -249,6 +251,13 @@ func (c *Config) LoadSettings(path string) error {
 		mode, err := cfg.Section(ini.DefaultSection).Key("torfriendly").Bool()
 		if err == nil {
 			c.AllowTorDNS = mode
+		}
+	}
+	
+	if cfg.Section(ini.DefaultSection).HasKey("srv_lookup") {
+		lookup, err := cfg.Section(ini.DefaultSection).Key("srv_lookup").Bool()
+		if err == nil {
+			c.DoServiceLookup = lookup
 		}
 	}
 	
