@@ -190,8 +190,7 @@ func (dt *dnsTask) Process(ctx context.Context, data pipeline.Data, tp pipeline.
 			dt.enum.Config.Log.Printf("Failed to enter %s into the request registry on the %s DNS task", msg.Question[0].Name, dt.trust)
 		}
 	case *requests.AddrRequest:
-		if dt.enum.Config.AllowTorDNS {
-			//Tor DNS does not implement PTR requests
+		if dt.enum.Config.NoRDNS || dt.enum.Config.AllowTorDNS {
 			return nil, nil
 		}
 		if reserved, _ := amassnet.IsReservedAddress(v.Address); !reserved {
@@ -428,6 +427,9 @@ func (dt *dnsTask) processFwdRequest(ctx context.Context, resp *dns.Msg, name st
 
 func (dt *dnsTask) processRevRequest(ctx context.Context, resp *dns.Msg, name string, qtype uint16, req *requests.AddrRequest, entry *req) {
 	defer dt.delReqWithDecrement(key(resp.Id, resp.Question[0].Name))
+	if dt.enum.Config.NoRDNS || dt.enum.Config.AllowTorDNS {
+		return
+	}
 
 	ans := resolve.ExtractAnswers(resp)
 	if len(ans) == 0 {
