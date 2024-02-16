@@ -24,7 +24,11 @@ var DefaultQueriesPerPublicResolver = 150
 // DefaultQueriesPerBaselineResolver is the number of queries sent to each trusted DNS resolver per second.
 var DefaultQueriesPerBaselineResolver = 150
 
+// DefaultResolvers are the default resolvers if no resolvers are specified in the config or via argument
+var DefaultResolvers = []string{"8.8.8.8", "8.8.4.4", "1.1.1.1", "7.7.7.7"}
+
 const minResolverReliability = 0.85
+
 
 
 // PublicResolvers includes the addresses of public resolvers obtained dynamically.
@@ -100,8 +104,8 @@ func (c *Config) AddResolver(resolver string) {
 
 // SetTrustedResolvers assigns the trusted resolver names provided in the parameter to the list in the configuration.
 func (c *Config) SetTrustedResolvers(resolvers ...string) {
-	c.Resolvers = []string{}
-	c.AddResolvers(resolvers...)
+	c.TrustedResolvers = []string{}
+	c.AddTrustedResolvers(resolvers...)
 }
 
 // AddTrustedResolvers appends the trusted resolver names provided in the parameter to the list in the configuration.
