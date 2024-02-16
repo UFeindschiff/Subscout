@@ -164,6 +164,8 @@ func NewConfig() *Config {
 		MinimumTTL:     1440,
 		ResolversQPS:   DefaultQueriesPerPublicResolver,
 		TrustedQPS:     DefaultQueriesPerBaselineResolver,
+		Resolvers:	DefaultResolvers,
+		TrustedResolvers: DefaultResolvers,
 	}
 }
 
