@@ -88,7 +88,7 @@ func (c *Cloudflare) dnsRequest(ctx context.Context, req *requests.DNSRequest) {
 	}
 
 	for _, zone := range zones {
-		records, err := api.DNSRecords(ctx, zone.ID, cloudflare.DNSRecord{})
+		records, _, err := api.ListDNSRecords(ctx, cloudflare.ZoneIdentifier(zone.ID), cloudflare.ListDNSRecordsParams{})
 		if err != nil {
 			c.sys.Config().Log.Printf("%s: %v", c.String(), err)
 		}
