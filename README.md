@@ -1,3 +1,6 @@
+## [Amass](https://github.com/OWASP/Amass) recently released version 5. I strongly encourage to use that instead
+Amass version 5 is a major refactoring and code cleanup of the amass sources. I saw they also finally realized and fixed some issues in the process as well. I strongly encourage using that unless you REALLY need some features provided by Subscout. I don't plan on really working on this anymore as the old Amass codebase (which this is based on) is an absolutely horrible mess. Should I one day grow dissatisfied with Amass ever again, maybe I'll revive this (and likely re-fork amass in its current version)
+
 # Subscout - A tool for active subdomain enumeration, network mapping and asset discovery
 
 ## Subscout is a fork of [OWASP Amass](https://github.com/OWASP/Amass) primarily focussed on flexible, performant active subdomain enumeration
